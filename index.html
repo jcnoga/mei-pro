@@ -1,194 +1,59 @@
 <!DOCTYPE html>
 <!-- 
-    GESTOR MEI - VERSÃO V11.3 (CORREÇÕES DE FILTROS, UI E WHATSAPP)
+    GESTOR MEI - VERSÃO V12.3 (CÓDIGO COMPLETO)
     
-    ALTERAÇÕES V11.3:
-    1. WhatsApp: Inclusão da quantidade de dias na mensagem de solicitação de licença.
-    2. Licença: Mascaramento visual do código aleatório (Mantido da v11.2).
-    
-    ALTERAÇÕES V11.2:
-    1. Financeiro: Implementado filtro funcional (Todos/Entradas/Saídas) com destaque visual.
-    2. Financeiro: Correção na seleção de entidades no modal de lançamento.
-    3. Cadastros: Adicionado destaque visual (active state) nos botões de seleção de tipo.
-    4. Configurações: Sincronização automática dos dados da empresa como fornecedor.
+    INTEGRAÇÃO TOTAL:
+    - HTML Estruturado
+    - CSS Externo (style.css)
+    - JS Externo (script.js)
+    - Módulos: Dashboard, Agenda, Lembretes, Cadastros, Financeiro, RPA, Fiscal, Relatórios, Config.
 -->
 <html lang="pt-BR">
 <head>
+
+
+
+<!-- aqui -->  
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Gestor MEI">
+
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+
+<!-- aqui -->
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+            .then(reg => console.log('Service Worker registrado:', reg.scope))
+            .catch(err => console.error('Erro ao registrar SW:', err));
+    });
+}
+</script>
+
+
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestor MEI - Sistema Integrado V11.3</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --secondary: #1e40af;
-            --success: #16a34a;
-            --danger: #dc2626;
-            --warning: #ca8a04;
-            --info: #06b6d4;
-            --bg: #f3f4f6;
-            --card-bg: #ffffff;
-            --text: #1f2937;
-            --text-light: #6b7280;
-            --border: #e5e7eb;
-            --input-bg: #e0f2fe; 
-            --input-border: #93c5fd;
-        }
+    <title>Gestor MEI - Sistema Completo V12.3</title>
+    
+    <!-- FIREBASE SDK (Compatível com GitHub Pages) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background-color: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; }
-        
-        /* Utilitários */
-        .hidden { display: none !important; }
-        .flex { display: flex; }
-        .flex-col { flex-direction: column; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .justify-center { justify-content: center; }
-        .gap-2 { gap: 0.5rem; }
-        .gap-4 { gap: 1rem; }
-        .p-4 { padding: 1rem; }
-        .mt-2 { margin-top: 0.5rem; }
-        .mt-4 { margin-top: 1rem; }
-        .mb-2 { margin-bottom: 0.5rem; }
-        .mb-4 { margin-bottom: 1rem; }
-        .w-full { width: 100%; }
-        .text-center { text-align: center; }
-        .text-sm { font-size: 0.875rem; }
-        .font-bold { font-weight: bold; }
-        .text-danger { color: var(--danger); }
-        .text-success { color: var(--success); }
-        .text-primary { color: var(--primary); }
-        .text-info { color: var(--info); }
-        .text-warning { color: var(--warning); }
-
-        /* Botões e Inputs */
-        label { display: block; margin-bottom: 0.25rem; font-weight: 600; font-size: 0.9rem; margin-top: 0.5rem; }
-        
-        input, select, textarea {
-            width: 100%; 
-            padding: 0.75rem; 
-            border: 1px solid var(--input-border); 
-            background-color: var(--input-bg); 
-            border-radius: 0.375rem; 
-            margin-bottom: 0.5rem; 
-            outline: none;
-            color: #0f172a;
-            font-weight: 500;
-        }
-        input:focus, select:focus, textarea:focus { 
-            border-color: var(--primary); 
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
-            background-color: #dbeafe;
-        }
-        input[readonly] { background-color: #f3f4f6; border-color: #d1d5db; color: #4b5563; }
-
-        button {
-            padding: 0.75rem 1rem; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 600; transition: 0.2s;
-        }
-        .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:hover { background-color: var(--secondary); }
-        .btn-success { background-color: var(--success); color: white; }
-        .btn-danger { background-color: var(--danger); color: white; }
-        .btn-warning { background-color: var(--warning); color: white; }
-        .btn-info { background-color: var(--info); color: white; }
-        
-        /* Botão Outline e Estado Ativo */
-        .btn-outline { background-color: transparent; border: 1px solid var(--primary); color: var(--primary); }
-        .btn-outline:hover { background-color: rgba(37, 99, 235, 0.1); }
-        .btn-outline.active { background-color: var(--primary); color: white; }
-
-        .google-btn { background-color: #db4437; color: white; }
-        .action-btn { padding: 0.4rem 0.6rem; font-size: 0.85rem; margin-right: 0.25rem; margin-bottom: 0; }
-
-        /* Auth Screen */
-        #auth-screen {
-            flex: 1; display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, var(--primary), var(--secondary));
-        }
-        .auth-card {
-            background: var(--card-bg); padding: 2rem; border-radius: 0.5rem; width: 100%; max-width: 400px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-
-        /* Layout App */
-        #app-container { display: flex; flex: 1; height: 100vh; overflow: hidden; }
-        
-        /* Sidebar */
-        aside {
-            width: 250px; background-color: #111827; color: white; display: flex; flex-direction: column; padding: 1rem; transition: transform 0.3s;
-        }
-        aside h2 { margin-bottom: 2rem; text-align: center; font-size: 1.5rem; }
-        .nav-item {
-            padding: 0.75rem; cursor: pointer; border-radius: 0.375rem; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.75rem;
-        }
-        .nav-item:hover, .nav-item.active { background-color: #374151; }
-        .user-info { margin-top: auto; padding-top: 1rem; border-top: 1px solid #374151; font-size: 0.875rem; }
-
-        /* Main Content */
-        main { flex: 1; overflow-y: auto; padding: 1.5rem; }
-        .view-header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
-        
-        /* Cards Dashboard */
-        .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
-        .stat-card { background: var(--card-bg); padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1rem; }
-        .stat-value { font-size: 1.5rem; font-weight: bold; margin-top: 0.5rem; }
-        .stat-sub { font-size: 0.9rem; color: var(--text-light); margin-top: 0.25rem; }
-
-        /* Tabelas */
-        .table-container { overflow-x: auto; background: var(--card-bg); border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
-        th { background-color: #f9fafb; font-weight: 600; }
-        tr:hover { background-color: #f9fafb; }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;
-        }
-        .modal { background: var(--card-bg); padding: 2rem; border-radius: 0.5rem; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            #app-container { flex-direction: column; }
-            aside { width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: 0.5rem; }
-            aside h2, .user-info { display: none; }
-            .nav-item { flex: 0 0 auto; margin: 0; font-size: 0.8rem; }
-            .dash-grid { grid-template-columns: 1fr; }
-        }
-        
-        .notification-bar {
-            background-color: var(--warning); color: white; padding: 0.5rem; text-align: center; font-weight: bold; font-size: 0.9rem;
-        }
-
-        /* Tabs para Listagens */
-        .tabs { display: flex; gap: 0.5rem; overflow-x: auto; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 1rem; }
-        .tab-btn { padding: 0.5rem 1rem; background: none; border: none; cursor: pointer; font-weight: 600; color: var(--text-light); border-radius: 0.25rem; white-space: nowrap; }
-        .tab-btn.active { background-color: var(--primary); color: white; }
-
-        /* RPA Estilo Específico */
-        .rpa-paper {
-            background: white; border: 1px solid #ccc; padding: 2rem; max-width: 800px; margin: 0 auto;
-        }
-        .rpa-section { margin-bottom: 1rem; border: 1px solid #eee; padding: 1rem; border-radius: 4px; }
-        .rpa-section h4 { margin-bottom: 0.5rem; border-bottom: 2px solid #eee; padding-bottom: 0.25rem; color: var(--primary); }
-        
-        /* Estilo de Impressão (PDF) */
-        @media print {
-            aside, .notification-bar, .view-header, .no-print, .tabs { display: none !important; }
-            #app-container { height: auto; display: block; }
-            main { padding: 0; overflow: visible; background: white; }
-            body { background: white; }
-            .table-container { box-shadow: none; border: none; }
-            table { width: 100%; border: 1px solid #000; }
-            th, td { border: 1px solid #000; padding: 5px; font-size: 12px; }
-            #rpa-content { border: none; box-shadow: none; padding: 0; }
-            .rpa-paper { border: none; padding: 0; width: 100%; max-width: none; }
-            input, select { border: none; background: transparent; padding: 0; font-weight: bold; }
-            section:not(.active-print) { display: none !important; }
-        }
-    </style>
+    <!-- Folha de Estilos Externa -->
+    <link rel="stylesheet" href="style.css">
 </head>
+<!-- aqui -->
+
 <body>
 
-    <!-- Tela de Autenticação -->
+    <!-- TELA DE AUTENTICAÇÃO (LOGIN/REGISTRO) -->
     <div id="auth-screen">
         <div class="auth-card">
             <h2 class="text-center" style="margin-bottom: 1.5rem;">Gestor MEI</h2>
@@ -198,7 +63,8 @@
                 <button type="submit" class="btn-primary w-full">Entrar</button>
                 <div class="mt-4 flex flex-col gap-2">
                     <button type="button" class="btn-outline w-full" onclick="toggleAuth('register')">Criar Conta (90 dias grátis)</button>
-                    <button type="button" class="google-btn w-full" onclick="alert('Simulação: Login com Google realizado!')">Entrar com Google</button>
+                    <!-- Integração Google -->
+                    <button type="button" class="google-btn w-full" onclick="handleGoogleLogin()">Entrar com Google</button>
                     <a href="#" onclick="alert('Simulação: Link de recuperação enviado para o e-mail!')" class="text-center text-sm text-primary mt-2">Esqueci minha senha</a>
                 </div>
             </form>
@@ -212,12 +78,16 @@
         </div>
     </div>
 
-    <!-- Aplicação Principal -->
+    <!-- APLICAÇÃO PRINCIPAL (SIDEBAR + CONTEÚDO) -->
     <div id="app-container" class="hidden">
+        
+        <!-- BARRA LATERAL (MENU) -->
         <aside>
             <h2>Gestor MEI</h2>
             <nav class="flex-col flex w-full">
                 <div class="nav-item active" onclick="navTo('dashboard')">📊 Dashboard</div>
+                <div class="nav-item" onclick="navTo('agenda')">📅 Agenda</div>
+                <div class="nav-item" onclick="navTo('lembretes')">🔔 Lembretes</div> 
                 <div class="nav-item" onclick="navTo('cadastros')">🧾 Cadastros</div>
                 <div class="nav-item" onclick="navTo('financeiro')">💰 Financeiro</div>
                 <div class="nav-item" onclick="navTo('rpa')">📄 Gerador RPA</div>
@@ -226,16 +96,20 @@
                 <div class="nav-item" onclick="navTo('configuracoes')">⚙️ Configurações</div>
             </nav>
             <div class="user-info">
-                <p id="user-name-display">Usuário</p>
+                <p>
+                    <span id="sync-indicator" class="sync-status sync-offline" title="Offline / Local"></span>
+                    <span id="user-name-display">Usuário</span>
+                </p>
                 <p id="license-days-display" class="text-success text-sm">Licença Ativa</p>
                 <button onclick="logout()" class="text-danger text-sm mt-2 w-full text-left" style="background: rgba(220, 38, 38, 0.1); border-radius: 4px; padding: 0.5rem; text-align: center;">🚪 Sair / Logout</button>
             </div>
         </aside>
 
+        <!-- ÁREA PRINCIPAL DE CONTEÚDO -->
         <main>
             <div id="license-warning" class="notification-bar hidden">Sua licença expirou! Renove nas configurações.</div>
 
-            <!-- View: Dashboard -->
+            <!-- VIEW: DASHBOARD -->
             <section id="view-dashboard">
                 <div class="view-header"><h1>Visão Geral</h1></div>
                 <div class="dash-grid">
@@ -261,7 +135,83 @@
                 </div>
             </section>
 
-            <!-- View: Listagens -->
+            <!-- VIEW: AGENDA -->
+            <section id="view-agenda" class="hidden">
+                <div class="view-header flex justify-between items-center">
+                    <h1>Agenda de Compromissos</h1>
+                    <button class="btn-primary" onclick="openAppointmentModal()">+ Novo Agendamento</button>
+                </div>
+                <div class="flex gap-2 mb-4">
+                    <input type="date" id="agenda-filter-date" onchange="renderAgenda()" style="max-width: 200px; margin:0;">
+                    <button class="btn-outline" onclick="renderAgenda('all')">Ver Todos</button>
+                    <button class="btn-outline" onclick="renderAgenda('today')">Hoje</button>
+                </div>
+                <div id="agenda-list" class="dash-grid"></div>
+            </section>
+
+            <!-- VIEW: LEMBRETES (NOVA ABA) -->
+            <section id="view-lembretes" class="hidden">
+                <div class="view-header"><h1>Gerenciamento de Lembretes</h1></div>
+                
+                <div class="stat-card mb-4">
+                    <h3 id="rem-form-title">🔔 Novo Lembrete</h3>
+                    <form onsubmit="saveReminder(event)">
+                        <!-- CAMPO HIDDEN PARA ID (EDIÇÃO) -->
+                        <input type="hidden" id="rem-id">
+                        
+                        <label>Título do Lembrete</label>
+                        <input type="text" id="rem-title" placeholder="Ex: Pagar Boleto" required>
+                        
+                        <div class="flex gap-2">
+                            <div class="w-full">
+                                <label>Data e Horário</label>
+                                <input type="datetime-local" id="rem-datetime" required>
+                            </div>
+                            <div class="w-full">
+                                <label>Periodicidade</label>
+                                <select id="rem-period">
+                                    <option value="once">Uma vez</option>
+                                    <option value="hourly">Horário</option>
+                                    <option value="daily">Diário</option>
+                                    <option value="weekly">Semanal</option>
+                                    <option value="biweekly">Quinzenal</option>
+                                    <option value="monthly">Mensal</option>
+                                    <option value="yearly">Anual</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <label>E-mail de Destino</label>
+                        <input type="email" id="rem-email" placeholder="seu@email.com" required>
+
+                        <label>Texto da Mensagem</label>
+                        <textarea id="rem-msg" rows="3" required></textarea>
+
+                        <div class="flex gap-2 items-center mt-2 mb-2">
+                            <input type="checkbox" id="rem-immediate" style="width:auto; margin-bottom:0;">
+                            <label for="rem-immediate" style="margin-top:0; margin-bottom:0;">Enviar imediatamente (abrir email)</label>
+                        </div>
+
+                        <div class="flex gap-2 mt-2">
+                            <button type="submit" class="btn-primary w-full" id="rem-btn-save">Salvar Lembrete</button>
+                            <button type="button" class="btn-outline hidden" id="rem-btn-cancel" onclick="cancelReminderEdit()">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="stat-card">
+                    <h4>Lembretes Configurados</h4>
+                    <p class="text-sm text-light mb-2">Envios automáticos gerenciados pelo servidor.</p>
+                    <div class="table-container mt-2">
+                        <table id="reminders-table">
+                            <thead><tr><th>Título</th><th>Próximo Disparo</th><th>Repetição</th><th>Ações</th></tr></thead>
+                            <tbody id="reminders-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: LISTAGENS -->
             <section id="view-listagens" class="hidden">
                 <div class="view-header flex justify-between items-center">
                     <h1>Relatórios</h1>
@@ -291,7 +241,7 @@
                 </div>
             </section>
 
-            <!-- View: Financeiro -->
+            <!-- VIEW: FINANCEIRO -->
             <section id="view-financeiro" class="hidden">
                 <div class="view-header flex justify-between items-center">
                     <h1>Movimentações Financeiras</h1>
@@ -309,10 +259,9 @@
                 </div>
             </section>
 
-            <!-- View: Gerador RPA -->
+            <!-- VIEW: RPA -->
             <section id="view-rpa" class="hidden">
                 <div class="view-header no-print"><h1>Gerador de RPA</h1></div>
-                
                 <div class="stat-card mb-4 no-print">
                     <div class="flex gap-4 flex-col md:flex-row">
                         <div class="w-full">
@@ -326,10 +275,11 @@
                                 <button class="btn-success w-full" onclick="saveRPA()">💾 Salvar RPA</button>
                                 <button class="btn-warning w-full" onclick="toggleRPAHistory()">📜 Histórico</button>
                             </div>
-                            <div class="flex gap-2">
+                            <div class="flex gap-2 mb-2">
                                 <button class="btn-primary w-full" onclick="exportRPAPdf()">🖨️ PDF</button>
                                 <button class="btn-info w-full" onclick="exportRPADoc()">📄 Word</button>
                             </div>
+                            <button class="btn-outline w-full" onclick="sendRPAEmail()">📧 Enviar por E-mail</button>
                         </div>
                     </div>
                     <div id="rpa-history-container" class="hidden mt-4 border-t pt-4">
@@ -352,6 +302,7 @@
                         <h4>2. Autônomo (Prestador)</h4>
                         <label>Nome Completo:</label><input type="text" id="rpa-prov-name">
                         <div class="flex gap-2"><div class="w-full"><label>CPF:</label><input type="text" id="rpa-prov-cpf"></div><div class="w-full"><label>Telefone:</label><input type="text" id="rpa-prov-phone"></div></div>
+                        <div class="w-full"><label>Email:</label><input type="email" id="rpa-prov-email" placeholder="email@exemplo.com"></div>
                         <label>Endereço:</label><input type="text" id="rpa-prov-addr">
                     </div>
                     <div class="rpa-section">
@@ -386,7 +337,7 @@
                 </div>
             </section>
 
-            <!-- View: Cadastros -->
+            <!-- VIEW: CADASTROS -->
             <section id="view-cadastros" class="hidden">
                 <div class="view-header"><h1>Cadastros</h1></div>
                 <div class="flex gap-2 mb-4 overflow-x-auto">
@@ -404,7 +355,7 @@
                 </div>
             </section>
 
-            <!-- View: Fiscal -->
+            <!-- VIEW: FISCAL -->
             <section id="view-fiscal" class="hidden">
                 <div class="view-header"><h1>Fiscal & Obrigações</h1></div>
                 <div class="dash-grid">
@@ -425,7 +376,7 @@
                 </div>
             </section>
 
-            <!-- View: Configurações -->
+            <!-- VIEW: CONFIGURAÇÕES -->
             <section id="view-configuracoes" class="hidden">
                 <div class="view-header"><h1>Configurações</h1></div>
                 <div class="stat-card mb-4">
@@ -457,17 +408,24 @@
                         <button type="submit" class="btn-primary mt-2">Salvar Dados</button>
                     </form>
                 </div>
+                
+                <!-- ÁREA DE GESTÃO DE USUÁRIOS (RESTRICTED ID) -->
+                <div id="admin-panel" class="stat-card mb-4 hidden">
+                    <h3>👥 Gestão de Usuários (Admin)</h3>
+                    <p class="text-sm text-light mb-2">Acesso restrito: jcnvap@gmail.com</p>
+                    <button class="btn-info w-full" onclick="openUserManagementModal()">📂 Abrir Lista de Usuários</button>
+                </div>
+
                 <div class="stat-card mb-4">
-                    <h3>💾 Backup</h3>
+                    <h3>💾 Backup & Sincronização</h3>
                     <div class="flex gap-4 mt-2 items-center flex-wrap">
                         <button class="btn-info" onclick="downloadBackup()">📥 Backup (.json)</button>
                         <div class="flex flex-col"><label style="margin-top:0">Restaurar</label><input type="file" id="restore-file" accept=".json" onchange="restoreBackup(this)"></div>
                     </div>
                 </div>
                 <div class="stat-card mb-4">
-                    <h3>🔐 Licença</h3>
+                    <h3>🔐 Licença Pessoal</h3>
                     <div class="flex flex-col gap-2 mt-2">
-                        <!-- Mantido o mascaramento visual -->
                         <div class="flex gap-2"><input type="password" id="license-random-code" readonly><button class="btn-outline" onclick="generateLicenseCode()">Gerar</button></div>
                         <input type="number" id="license-days-input" placeholder="Dias">
                         <button class="btn-success" onclick="sendWhatsApp()">📱 WhatsApp</button>
@@ -478,8 +436,8 @@
         </main>
     </div>
 
-    <!-- Modais -->
-    <div id="modal-transaction" class="modal-overlay hidden">
+    <!-- MODAL: TRANSAÇÃO FINANCEIRA -->
+    <div id="modal-transaction" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('modal-transaction')">
         <div class="modal">
             <h2>Lançamento Financeiro</h2>
             <form id="form-transaction" onsubmit="saveTransaction(event)">
@@ -495,7 +453,8 @@
         </div>
     </div>
 
-    <div id="modal-crud" class="modal-overlay hidden">
+    <!-- MODAL: CRUD GENÉRICO -->
+    <div id="modal-crud" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('modal-crud')">
         <div class="modal">
             <h2 id="modal-crud-title">Item</h2>
             <form id="form-crud" onsubmit="saveCrudItem(event)">
@@ -506,7 +465,8 @@
         </div>
     </div>
 
-    <div id="modal-irrf" class="modal-overlay hidden">
+    <!-- MODAL: IRRF -->
+    <div id="modal-irrf" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('modal-irrf')">
         <div class="modal">
             <h2>Faixa IRRF</h2>
             <form id="form-irrf" onsubmit="saveIrrfRow(event)">
@@ -519,476 +479,104 @@
         </div>
     </div>
 
-    <script>
-        // --- CONSTANTES DE URL PADRÃO ---
-        const DEFAULT_URL_FISCAL = "https://www.nfse.gov.br/EmissorNacional/Login?ReturnUrl=%2fEmissorNacional";
-        const DEFAULT_URL_DAS = "https://www8.receita.fazenda.gov.br/SimplesNacional/Aplicacoes/ATSPO/pgmei.app/Identificacao";
-        const DB_KEY = 'MEI_SYSTEM_V11';
-        let appData = { currentUser: null, users: [], records: {}, irrfTable: [] };
-        
-        const DEFAULT_IRRF = [
-            { id: 'irrf_1', max: 2259.20, rate: 0, deduction: 0 },
-            { id: 'irrf_2', max: 2826.65, rate: 7.5, deduction: 169.44 },
-            { id: 'irrf_3', max: 3751.05, rate: 15, deduction: 381.44 },
-            { id: 'irrf_4', max: 4664.68, rate: 22.5, deduction: 662.77 },
-            { id: 'irrf_5', max: 99999999, rate: 27.5, deduction: 896.00 }
-        ];
+    <!-- MODAL: AGENDAMENTO -->
+    <div id="modal-appointment" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('modal-appointment')">
+        <div class="modal">
+            <h2>Agendamento</h2>
+            <form id="form-appointment" onsubmit="saveAppointment(event)">
+                <input type="hidden" id="appt-id">
+                <label>Título do Compromisso</label><input type="text" id="appt-title" required placeholder="Ex: Atendimento João">
+                <div class="flex gap-2">
+                    <div class="w-full"><label>Data</label><input type="date" id="appt-date" required></div>
+                    <div class="w-full"><label>Hora</label><input type="time" id="appt-time" required></div>
+                </div>
+                <div class="flex gap-2 items-end">
+                    <div class="w-full">
+                        <label>Buscar Cliente (Opcional)</label>
+                        <select id="appt-client-select" onchange="fillAppointmentClient()"></select>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <div class="w-full"><label>Nome do Cliente</label><input type="text" id="appt-client-name" required></div>
+                    <div class="w-full"><label>Telefone</label><input type="text" id="appt-client-phone"></div>
+                </div>
+                <label>Descrição do Serviço</label><textarea id="appt-desc" rows="2"></textarea>
+                <div class="flex gap-2">
+                    <div class="w-full"><label>Valor (R$)</label><input type="number" step="0.01" id="appt-value" placeholder="0.00"></div>
+                    <div class="w-full"><label>Status</label><select id="appt-status"><option value="agendado">Agendado</option><option value="concluido">Concluído</option><option value="cancelado">Cancelado</option></select></div>
+                </div>
+                <div class="flex gap-2">
+                    <div class="w-full"><label>Forma Pagto.</label><select id="appt-pay-method"><option value="pix">Pix</option><option value="dinheiro">Dinheiro</option><option value="cartao">Cartão</option></select></div>
+                    <div class="w-full"><label>Status Pagto.</label><select id="appt-pay-status"><option value="pendente">Pendente</option><option value="pago">Pago</option></select></div>
+                </div>
+                <label>Observações</label><textarea id="appt-obs" rows="2"></textarea>
+                <div class="flex gap-2 mt-4"><button type="button" class="btn-outline w-full" onclick="closeModal('modal-appointment')">Cancelar</button><button type="submit" class="btn-primary w-full">Salvar Agendamento</button></div>
+            </form>
+        </div>
+    </div>
 
-        let currentCrudType = 'products'; 
-        let currentListingType = 'clients';
-        let currentFinanceFilter = 'all';
+    <!-- MODAL: GESTÃO DE USUÁRIOS (ADMIN) -->
+    <div id="modal-usermgmt" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('modal-usermgmt')">
+        <div class="modal" style="max-width: 800px;">
+            <h2>Lista de Usuários Cadastrados</h2>
+            <div class="table-container mt-2" style="max-height: 400px; overflow-y: auto;">
+                <table id="usermgmt-table">
+                    <thead><tr><th>Nome</th><th>E-mail</th><th>Licença Expira em</th><th>Ações</th></tr></thead>
+                    <tbody id="usermgmt-tbody"></tbody>
+                </table>
+            </div>
+            <div class="mt-4 text-center">
+                <button type="button" class="btn-outline" onclick="closeModal('modal-usermgmt')">Fechar</button>
+            </div>
+        </div>
+    </div>
 
-        function init() {
-            const saved = localStorage.getItem(DB_KEY);
-            if (saved) appData = JSON.parse(saved);
-            if (!appData.irrfTable || appData.irrfTable.length === 0) appData.irrfTable = JSON.parse(JSON.stringify(DEFAULT_IRRF));
+    <!-- MODAL: CRÉDITOS (ADMIN) -->
+    <div id="modal-credits" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('modal-credits')">
+        <div class="modal" style="max-width: 400px;">
+            <h2>Gerenciar Créditos</h2>
+            <p id="credit-user-display" class="mb-4 text-primary font-bold"></p>
+            <input type="hidden" id="credit-user-id">
             
-            const sessionUser = sessionStorage.getItem('mei_user_id');
-            if (sessionUser) {
-                const user = appData.users.find(u => u.id === sessionUser);
-                if (user) { loginUser(user); return; }
-            }
-            showAuth();
-        }
+            <div class="mb-4">
+                <label>Tipo de Ajuste:</label>
+                <div class="flex gap-4">
+                    <label style="font-weight:normal; display:flex; align-items:center; gap:5px;"><input type="radio" name="creditType" value="days" checked onchange="toggleCreditMode()"> Adicionar Dias</label>
+                    <label style="font-weight:normal; display:flex; align-items:center; gap:5px;"><input type="radio" name="creditType" value="date" onchange="toggleCreditMode()"> Definir Data Limite</label>
+                </div>
+            </div>
 
-        function showAuth() { document.getElementById('auth-screen').classList.remove('hidden'); document.getElementById('app-container').classList.add('hidden'); }
-        function saveData() { try { localStorage.setItem(DB_KEY, JSON.stringify(appData)); } catch (e) { alert('Erro ao salvar.'); } }
+            <div id="credit-mode-days">
+                <label>Dias a adicionar:</label>
+                <input type="number" id="credit-days-input" placeholder="Ex: 30, 90, 365">
+            </div>
 
-        function loginUser(user) {
-            appData.currentUser = user; sessionStorage.setItem('mei_user_id', user.id);
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('app-container').classList.remove('hidden');
-            document.getElementById('user-name-display').innerText = user.name;
-            checkLicense(); navTo('dashboard'); loadFiscalReminders();
-        }
+            <div id="credit-mode-date" class="hidden">
+                <label>Nova Data de Validade:</label>
+                <input type="date" id="credit-date-input">
+            </div>
 
-        function logout() { appData.currentUser = null; sessionStorage.removeItem('mei_user_id'); location.reload(); }
+            <div class="flex gap-2 mt-4">
+                <button type="button" class="btn-outline w-full" onclick="closeModal('modal-credits')">Cancelar</button>
+                <button type="button" class="btn-success w-full" onclick="saveUserCredits()">Confirmar</button>
+            </div>
+        </div>
+    </div>
 
-        function toggleAuth(screen) {
-            document.getElementById('login-form').classList.toggle('hidden', screen === 'register');
-            document.getElementById('register-form').classList.toggle('hidden', screen !== 'register');
-        }
+    <!-- MODAL: ALERTA AUTOMÁTICO DE LEMBRETE -->
+    <div id="modal-alert" class="modal-overlay hidden">
+        <div class="modal" style="max-width: 400px; text-align: center; border-left: 5px solid var(--warning);">
+            <h2 id="alert-title" class="mb-2">🔔 Lembrete!</h2>
+            <p id="alert-msg" class="mb-4 text-lg"></p>
+            <p id="alert-time" class="text-sm text-light mb-4"></p>
+            <div class="flex flex-col gap-2">
+                <a id="alert-btn-email" href="#" class="btn-primary w-full">📧 Enviar Email Agora</a>
+                <button class="btn-outline w-full" onclick="closeModal('modal-alert')">Fechar</button>
+            </div>
+        </div>
+    </div>
 
-        // --- REGISTRO COM SEED DATA (DADOS DE EXEMPLO) ---
-        document.getElementById('register-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('reg-email').value;
-            if (appData.users.find(u => u.email === email)) return alert('E-mail já existe!');
-            
-            // Definição do Pró-labore padrão (4000)
-            const newUser = {
-                id: 'u_' + Date.now(), name: document.getElementById('reg-name').value, email: email,
-                password: document.getElementById('reg-password').value,
-                licenseExpire: new Date().getTime() + (90 * 86400000),
-                company: { reserve_rate: 10, prolabore_target: 4000 }
-            };
-            appData.users.push(newUser); 
-            
-            // Criação com dados de exemplo
-            const today = new Date().toISOString().split('T')[0];
-            appData.records[newUser.id] = { 
-                products: [{id: 'p_ex', name: 'Produto Exemplo A', price: 100.00, description: 'Produto para teste'}], 
-                services: [{id: 's_ex', name: 'Serviço Exemplo B', price: 200.00, description: 'Serviço para teste'}], 
-                clients: [{id: 'c_ex', name: 'Cliente Teste', phone: '(11) 99999-9999', address: 'Rua Exemplo, 100', cnpj_cpf: '000.000.000-00', contact_person: 'João', email: 'cliente@teste.com'}], 
-                suppliers: [{id: 'f_ex', name: 'Fornecedor Teste', phone: '(11) 88888-8888', address: 'Av Exemplo, 200', cnpj_cpf: '00.000.000/0001-00', contact_person: 'Maria', email: 'fornecedor@teste.com'}], 
-                transactions: [
-                    {id: 't_ex1', type: 'receita', category: 'Venda de produto', value: 150.00, date: today, obs: 'Venda inicial de teste', entity: 'Cliente Teste'},
-                    {id: 't_ex2', type: 'despesa', category: 'Despesas Operacionais', value: 50.00, date: today, obs: 'Despesa inicial de teste', entity: 'Fornecedor Teste'}
-                ], 
-                rpas: [] 
-            };
-            
-            saveData(); loginUser(newUser);
-        });
-
-        document.getElementById('login-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const user = appData.users.find(u => u.email === document.getElementById('login-email').value && u.password === document.getElementById('login-password').value);
-            user ? loginUser(user) : alert('Erro no login');
-        });
-
-        function navTo(viewId) {
-            document.querySelectorAll('main section').forEach(el => el.classList.add('hidden'));
-            document.getElementById('view-' + viewId).classList.remove('hidden');
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            // Marca menu ativo
-            const btn = Array.from(document.querySelectorAll('.nav-item')).find(el => el.getAttribute('onclick').includes(viewId));
-            if(btn) btn.classList.add('active');
-            
-            if(viewId === 'dashboard') updateDashboard();
-            if(viewId === 'listagens') switchListing('clients');
-            if(viewId === 'financeiro') renderTransactions();
-            if(viewId === 'cadastros') renderCrud(currentCrudType);
-            if(viewId === 'fiscal') {
-                renderIrrf();
-                const comp = appData.currentUser.company || {};
-                document.getElementById('link-emissor').href = comp.url_fiscal || DEFAULT_URL_FISCAL;
-                document.getElementById('link-das').href = comp.url_das || DEFAULT_URL_DAS;
-            }
-            if(viewId === 'configuracoes') loadSettings();
-            if(viewId === 'rpa') loadRPAOptions();
-        }
-
-        // --- Configurações ---
-        function loadSettings() {
-            const c = appData.currentUser.company || {};
-            document.getElementById('conf-company-name').value = c.name||''; 
-            document.getElementById('conf-cnpj').value = c.cnpj||''; 
-            document.getElementById('conf-address').value = c.address||''; 
-            document.getElementById('conf-phone').value = c.phone||''; 
-            document.getElementById('conf-whatsapp').value = c.whatsapp||'';
-            
-            document.getElementById('conf-url-fiscal').value = c.url_fiscal || DEFAULT_URL_FISCAL;
-            document.getElementById('conf-url-das').value = c.url_das || DEFAULT_URL_DAS;
-            
-            document.getElementById('conf-reserve-rate').value = c.reserve_rate || 10;
-            document.getElementById('conf-prolabore-target').value = c.prolabore_target || 4000;
-        }
-
-        function saveCompanyData(e) {
-            e.preventDefault();
-            
-            // Dados da empresa
-            const companyData = {
-                name: document.getElementById('conf-company-name').value,
-                cnpj: document.getElementById('conf-cnpj').value,
-                address: document.getElementById('conf-address').value,
-                phone: document.getElementById('conf-phone').value,
-                whatsapp: document.getElementById('conf-whatsapp').value,
-                role: document.getElementById('conf-role').value,
-                url_fiscal: document.getElementById('conf-url-fiscal').value,
-                url_das: document.getElementById('conf-url-das').value,
-                reserve_rate: parseFloat(document.getElementById('conf-reserve-rate').value),
-                prolabore_target: parseFloat(document.getElementById('conf-prolabore-target').value)
-            };
-
-            appData.currentUser.company = companyData;
-            const idx = appData.users.findIndex(u=>u.id===appData.currentUser.id); 
-            appData.users[idx] = appData.currentUser; 
-
-            // --- SINCRONIA: Salvar Empresa como Fornecedor ---
-            const supplierId = 'sup_own_' + appData.currentUser.id;
-            const supplierData = {
-                id: supplierId,
-                name: companyData.name + " (Minha Empresa)",
-                cnpj_cpf: companyData.cnpj,
-                phone: companyData.phone,
-                address: companyData.address,
-                email: appData.currentUser.email,
-                contact_person: appData.currentUser.name,
-                is_own_company: true
-            };
-            
-            const suppliersList = getUserData().suppliers;
-            const supIndex = suppliersList.findIndex(s => s.id === supplierId);
-            if(supIndex >= 0) {
-                suppliersList[supIndex] = supplierData;
-            } else {
-                suppliersList.push(supplierData);
-            }
-            // ------------------------------------------------
-
-            saveData(); alert('Dados salvos e cadastro de fornecedor atualizado!');
-        }
-
-        // --- Dashboard ---
-        function updateDashboard() {
-            const t = getUserData().transactions; 
-            const currentMonth = new Date().getMonth();
-            const currentYear = new Date().getFullYear();
-            const reserveRate = appData.currentUser.company.reserve_rate || 10;
-            const prolaboreTarget = appData.currentUser.company.prolabore_target || 4000;
-
-            let income = 0;
-            let expense = 0;
-            let totalReserve = 0;
-            let totalProlabore = 0;
-
-            t.forEach(x => {
-                const d = new Date(x.date);
-                const isCurrentMonth = d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-
-                if (x.type === 'receita') {
-                    if (isCurrentMonth) {
-                        income += x.value;
-                        const reserveAmount = x.value * (reserveRate / 100);
-                        totalReserve += reserveAmount;
-                        const remainder = x.value - reserveAmount;
-                        const needed = prolaboreTarget - totalProlabore;
-                        if (needed > 0) totalProlabore += (remainder >= needed) ? needed : remainder;
-                    }
-                } else {
-                    if (isCurrentMonth) expense += x.value;
-                }
-            });
-
-            document.getElementById('dash-income').innerText = `R$ ${income.toFixed(2)}`;
-            document.getElementById('dash-expense').innerText = `R$ ${expense.toFixed(2)}`;
-            document.getElementById('dash-balance').innerText = `R$ ${(income-expense).toFixed(2)}`;
-            
-            document.getElementById('reserve-percent-display').innerText = reserveRate;
-            document.getElementById('dash-reserve').innerText = `R$ ${totalReserve.toFixed(2)}`;
-            document.getElementById('dash-prolabore').innerText = `R$ ${totalProlabore.toFixed(2)}`;
-            document.getElementById('dash-prolabore-target').innerText = `Meta: R$ ${prolaboreTarget.toFixed(2)}`;
-        }
-
-        // --- RPA ---
-        function loadRPAOptions() {
-            const comp = appData.currentUser.company || {};
-            document.getElementById('rpa-comp-name').value = comp.name || '';
-            document.getElementById('rpa-comp-cnpj').value = comp.cnpj || '';
-            document.getElementById('rpa-comp-addr').value = comp.address || '';
-            
-            if(!document.getElementById('rpa-prov-name').value) {
-                document.getElementById('rpa-prov-name').value = appData.currentUser.name;
-            }
-
-            const select = document.getElementById('rpa-provider-select');
-            select.innerHTML = '<option value="">Selecione um Autônomo...</option>';
-            const suppliers = getUserData().suppliers || [];
-            suppliers.forEach(s => select.innerHTML += `<option value="${s.id}">${s.name}</option>`);
-            document.getElementById('rpa-date').valueAsDate = new Date();
-            document.getElementById('rpa-id').value = '';
-        }
-
-        function fillRPAProvider() {
-            const id = document.getElementById('rpa-provider-select').value;
-            const s = getUserData().suppliers.find(item => item.id === id);
-            if (s) {
-                document.getElementById('rpa-prov-name').value = s.name;
-                document.getElementById('rpa-prov-cpf').value = s.cnpj_cpf || '';
-                document.getElementById('rpa-prov-phone').value = s.phone || '';
-                document.getElementById('rpa-prov-addr').value = s.address || '';
-            }
-        }
-
-        function calculateRPA() {
-            const value = parseFloat(document.getElementById('rpa-value').value) || 0;
-            const issRate = parseFloat(document.getElementById('rpa-iss-rate').value) || 0;
-            const inss = value * 0.11;
-            document.getElementById('rpa-inss').value = `R$ ${inss.toFixed(2)}`;
-            const iss = value * (issRate / 100);
-            document.getElementById('rpa-iss-val').value = `R$ ${iss.toFixed(2)}`;
-            
-            const irrfBase = value - inss;
-            let irrf = 0;
-            const table = appData.irrfTable.sort((a,b) => a.max - b.max);
-            for(let row of table) {
-                if (irrfBase <= row.max) { irrf = (irrfBase * (row.rate / 100)) - row.deduction; break; }
-            }
-            if (irrf < 0) irrf = 0;
-            document.getElementById('rpa-irrf').value = `R$ ${irrf.toFixed(2)}`;
-            document.getElementById('rpa-net').value = `R$ ${(value - inss - iss - irrf).toFixed(2)}`;
-        }
-
-        function saveRPA() {
-            const id = document.getElementById('rpa-id').value;
-            const rpa = {
-                id: id || 'rpa_' + Date.now(),
-                date: document.getElementById('rpa-date').value,
-                provider: document.getElementById('rpa-prov-name').value,
-                desc: document.getElementById('rpa-desc').value,
-                value: document.getElementById('rpa-value').value,
-                net: document.getElementById('rpa-net').value,
-                fullData: {
-                    provName: document.getElementById('rpa-prov-name').value,
-                    provCpf: document.getElementById('rpa-prov-cpf').value,
-                    provPhone: document.getElementById('rpa-prov-phone').value,
-                    provAddr: document.getElementById('rpa-prov-addr').value,
-                    inss: document.getElementById('rpa-inss').value,
-                    iss: document.getElementById('rpa-iss-val').value,
-                    irrf: document.getElementById('rpa-irrf').value
-                }
-            };
-            if(!getUserData().rpas) getUserData().rpas = [];
-            const list = getUserData().rpas;
-            if(id) { const idx = list.findIndex(r => r.id === id); if(idx !== -1) list[idx] = rpa; else list.push(rpa); } else { list.push(rpa); }
-            saveData(); alert('RPA Salvo!'); toggleRPAHistory();
-        }
-
-        function toggleRPAHistory() {
-            const container = document.getElementById('rpa-history-container');
-            container.classList.toggle('hidden');
-            if(!container.classList.contains('hidden')) {
-                const tbody = document.querySelector('#rpa-history-table tbody');
-                tbody.innerHTML = '';
-                const list = getUserData().rpas || [];
-                list.sort((a,b) => new Date(b.date) - new Date(a.date));
-                list.forEach(r => {
-                    tbody.innerHTML += `<tr><td>${r.date}</td><td>${r.provider}</td><td>${r.net}</td><td><button class="action-btn btn-warning" onclick="loadRPA('${r.id}')">✏️</button><button class="action-btn btn-danger" onclick="deleteRPA('${r.id}')">🗑️</button></td></tr>`;
-                });
-            }
-        }
-
-        function loadRPA(id) {
-            const r = getUserData().rpas.find(x => x.id === id);
-            if(r) {
-                document.getElementById('rpa-id').value = r.id; 
-                document.getElementById('rpa-date').value = r.date;
-                document.getElementById('rpa-desc').value = r.desc;
-                document.getElementById('rpa-value').value = r.value;
-                document.getElementById('rpa-prov-name').value = r.fullData.provName;
-                document.getElementById('rpa-prov-cpf').value = r.fullData.provCpf;
-                document.getElementById('rpa-prov-phone').value = r.fullData.provPhone;
-                document.getElementById('rpa-prov-addr').value = r.fullData.provAddr;
-                calculateRPA(); alert('RPA Carregado.'); window.scrollTo(0,0);
-            }
-        }
-
-        function deleteRPA(id) { if(confirm('Excluir este RPA?')) { const l = getUserData().rpas; l.splice(l.findIndex(r => r.id === id), 1); saveData(); toggleRPAHistory(); } }
-        function exportRPAPdf() { document.querySelectorAll('section').forEach(s => s.classList.remove('active-print')); document.getElementById('view-rpa').classList.add('active-print'); window.print(); }
-        function exportRPADoc() { const html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'><title>RPA</title></head><body><h2 style="text-align:center">RPA - ${appData.currentUser.company.name}</h2><br><h3>1. Contratante</h3><p>Razão: ${document.getElementById('rpa-comp-name').value}</p><p>CNPJ: ${document.getElementById('rpa-comp-cnpj').value}</p><hr><h3>2. Autônomo</h3><p>Nome: ${document.getElementById('rpa-prov-name').value}</p><p>CPF: ${document.getElementById('rpa-prov-cpf').value}</p><hr><h3>3. Serviço</h3><p>${document.getElementById('rpa-desc').value}</p><p>Data: ${document.getElementById('rpa-date').value}</p><hr><h3>4. Valores</h3><p>Bruto: R$ ${document.getElementById('rpa-value').value}</p><p>Líquido: ${document.getElementById('rpa-net').value}</p></body></html>`; const blob = new Blob([html], { type: 'application/msword' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'RPA.doc'; a.click(); }
-
-        // --- Helpers Restantes ---
-        function exportReportPDF() { document.getElementById('report-company-header').innerText = appData.currentUser.company.name || "Minha Empresa"; document.querySelectorAll('section').forEach(s => s.classList.remove('active-print')); document.getElementById('view-listagens').classList.add('active-print'); window.print(); }
-        function exportReportDoc() { const header = `<h2>${appData.currentUser.company.name || "Minha Empresa"}</h2>`; const table = document.getElementById('listing-table').outerHTML; const html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'><title>Relatório</title></head><body>${header}<h3>Relatório do Sistema</h3>${table}</body></html>`; const blob = new Blob([html], { type: 'application/msword' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `Relatorio.doc`; a.click(); }
-        
-        // --- CRUD e CADASTROS (Com Destaque Visual) ---
-        function renderCrud(type) { 
-            currentCrudType = type; 
-            document.getElementById('crud-title').innerText = type.toUpperCase(); 
-            
-            // Destaque visual nos botões
-            document.querySelectorAll('.crud-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${type}'`));
-            });
-
-            const list = getUserData()[type]; 
-            const table = document.getElementById('crud-table'); 
-            let h = type.match(/products|services/) ? '<th>Nome</th><th>Desc</th><th>Preço</th>' : '<th>Nome</th><th>Contato</th><th>Info</th>'; 
-            table.innerHTML = `<thead><tr>${h}<th>Ações</th></tr></thead><tbody>` + list.map(i => `<tr><td>${i.name}</td><td>${i.description || i.contact_person || '-'}</td><td>${i.price ? 'R$ '+i.price : i.phone}</td><td><button class="action-btn btn-warning" onclick="editCrudItem('${i.id}')">✏️</button> <button class="action-btn btn-danger" onclick="deleteCrudItem('${type}','${i.id}')">🗑️</button></td></tr>`).join('') + `</tbody>`; 
-        }
-
-        function openCrudModal(isEdit = false, itemData = null) { document.getElementById('modal-crud').classList.remove('hidden'); document.getElementById('crud-id').value = itemData ? itemData.id : ''; const fields = document.getElementById('crud-fields'); if(currentCrudType.match(/products|services/)) { fields.innerHTML = `<label>Nome</label><input name="name" value="${itemData?.name||''}" required><label>Preço</label><input type="number" step="0.01" name="price" value="${itemData?.price||''}" required><label>Descrição</label><textarea name="description" rows="3">${itemData?.description||''}</textarea>`; } else { fields.innerHTML = `<label>Nome/Razão</label><input name="name" value="${itemData?.name||''}" required><label>Contato</label><input name="contact_person" value="${itemData?.contact_person||''}"><label>CPF/CNPJ</label><input name="cnpj_cpf" value="${itemData?.cnpj_cpf||''}"><label>Endereço</label><input name="address" value="${itemData?.address||''}"><label>Telefone</label><input name="phone" value="${itemData?.phone||''}"><label>Email</label><input name="email" value="${itemData?.email||''}">`; } }
-        function editCrudItem(id) { const item = getUserData()[currentCrudType].find(i => i.id === id); if (item) openCrudModal(true, item); }
-        function saveCrudItem(e) { e.preventDefault(); const id = document.getElementById('crud-id').value; const t = e.target; const item = { id: id || 'i_'+Date.now(), name: t.name.value, price: t.price?.value, description: t.description?.value, contact_person: t.contact_person?.value, phone: t.phone?.value, address: t.address?.value, cnpj_cpf: t.cnpj_cpf?.value, email: t.email?.value }; const list = getUserData()[currentCrudType]; const idx = list.findIndex(i => i.id === id); idx !== -1 ? list[idx] = item : list.push(item); saveData(); closeModal('modal-crud'); renderCrud(currentCrudType); }
-        function deleteCrudItem(t,id){ if(confirm('Apagar?')){const l=getUserData()[t]; l.splice(l.findIndex(x=>x.id===id),1); saveData(); renderCrud(t);} }
-        function getUserData() { return appData.records[appData.currentUser.id]; }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function checkLicense() { const d = Math.ceil((appData.currentUser.licenseExpire - Date.now())/86400000); document.getElementById('license-days-display').innerText = d>0?d+' dias':'Expirado'; document.getElementById('license-warning').classList.toggle('hidden', d>0); }
-        function generateLicenseCode() { document.getElementById('license-random-code').value = Math.floor(Math.random()*900)+100; }
-        // ALTERAÇÃO V11.3: Função WhatsApp ajustada para incluir dias
-        function sendWhatsApp() { 
-            const code = document.getElementById('license-random-code').value;
-            const days = document.getElementById('license-days-input').value;
-            window.open(`https://wa.me/5534997824990?text=Cod:${code} Dias:${days}`); 
-        }
-        function validateLicense() { const k=parseInt(document.getElementById('license-key-input').value),c=parseInt(document.getElementById('license-random-code').value),d=parseInt(document.getElementById('license-days-input').value); if(k===(c+13)*9+1954+d){appData.currentUser.licenseExpire+=d*86400000;saveData();checkLicense();alert('Ok');}else alert('Erro'); }
-        
-        // --- FINANCEIRO (Correção de Filtros e Seleção) ---
-        function filterFinance(filter) {
-            currentFinanceFilter = filter;
-            // Destaque visual
-            document.querySelectorAll('.fin-filter-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${filter}'`));
-            });
-            renderTransactions();
-        }
-
-        function renderTransactions(){ 
-            let l = getUserData().transactions.sort((a,b)=>new Date(b.date)-new Date(a.date)); 
-            
-            // Aplica filtro se diferente de 'all'
-            if (currentFinanceFilter !== 'all') {
-                l = l.filter(t => t.type === currentFinanceFilter);
-            }
-
-            document.querySelector('#finance-table tbody').innerHTML = l.length > 0 ? 
-                l.map(t=>`<tr><td>${t.date}</td><td>${t.type}</td><td>${t.category}</td><td>${t.obs||'-'}</td><td>R$ ${t.value}</td><td><button onclick="editTransaction('${t.id}')">✏️</button><button onclick="deleteTransaction('${t.id}')">🗑️</button></td></tr>`).join('') :
-                '<tr><td colspan="6" class="text-center p-4">Nenhuma movimentação encontrada.</td></tr>';
-        }
-        
-        function editTransaction(id){ 
-            const t=getUserData().transactions.find(x=>x.id===id); 
-            document.getElementById('trans-id').value=t.id; 
-            document.getElementById('trans-type').value=t.type; 
-            updateTransactionDependencies(); // Carrega lista de clientes/fornecedores
-            document.getElementById('trans-category').value=t.category; 
-            document.getElementById('trans-entity').value=t.entity; // Seleciona a entidade correta
-            document.getElementById('trans-value').value=t.value; 
-            document.getElementById('trans-date').value=t.date; 
-            document.getElementById('trans-obs').value=t.obs; 
-            document.getElementById('modal-transaction').classList.remove('hidden'); 
-        }
-        
-        function saveTransaction(e){ e.preventDefault(); const id=document.getElementById('trans-id').value; const t={id:id||'t_'+Date.now(), type:document.getElementById('trans-type').value, category:document.getElementById('trans-category').value, value:parseFloat(document.getElementById('trans-value').value), date:document.getElementById('trans-date').value, obs:document.getElementById('trans-obs').value, entity:document.getElementById('trans-entity').value}; const l=getUserData().transactions; const i=l.findIndex(x=>x.id===t.id); i!==-1?l[i]=t:l.push(t); saveData(); closeModal('modal-transaction'); renderTransactions(); }
-        function deleteTransaction(id){ if(confirm('Apagar?')){const l=getUserData().transactions; l.splice(l.findIndex(x=>x.id===id),1); saveData(); renderTransactions();} }
-        
-        function updateTransactionDependencies(){
-            const type = document.getElementById('trans-type').value;
-            // Categorias
-            const cats = type==='receita'?['Venda','Serviço','Outros']:['Compra','Despesa','Imposto', 'Gastos Pessoais']; 
-            document.getElementById('trans-category').innerHTML=cats.map(c=>`<option>${c}</option>`).join('');
-            
-            // Entidades (Correção: Assegura que todas as opções estejam disponíveis)
-            const select = document.getElementById('trans-entity');
-            const list = type === 'receita' ? getUserData().clients : getUserData().suppliers;
-            
-            if (list && list.length > 0) {
-                select.innerHTML = '<option value="">Selecione...</option>' + list.map(i => `<option value="${i.name}">${i.name}</option>`).join('');
-            } else {
-                select.innerHTML = '<option value="">Sem cadastros disponíveis</option>';
-            }
-        }
-        
-        function openTransactionModal(){ 
-            document.getElementById('form-transaction').reset(); 
-            document.getElementById('trans-id').value=''; 
-            document.getElementById('modal-transaction').classList.remove('hidden'); 
-            updateTransactionDependencies(); 
-        }
-
-        // --- LISTAGEM (Correção Visual) ---
-        function switchListing(t){ 
-            currentListingType=t; 
-            
-            // Highlight visual
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                b.classList.remove('active');
-                if(b.getAttribute('onclick').includes(`'${t}'`)) b.classList.add('active');
-            });
-
-            document.getElementById('listing-thead').innerHTML=t==='movimentacoes'?'<tr><th>Data</th><th>Tipo</th><th>Valor</th></tr>':'<tr><th>Nome</th><th>Detalhe</th><th>Valor/Tel</th></tr>'; const d=t==='movimentacoes'?getUserData().transactions:getUserData()[t]; document.getElementById('listing-tbody').innerHTML=d.map(i=>t==='movimentacoes'?`<tr><td>${i.date}</td><td>${i.type}</td><td>${i.value}</td></tr>`:`<tr><td>${i.name}</td><td>${i.description||i.contact_person||'-'}</td><td>${i.price||i.phone||'-'}</td></tr>`).join(''); 
-        }
-        
-        function loadFiscalReminders(){ document.getElementById('fiscal-reminders').innerHTML='<li>DAS Dia 20</li>'; }
-        function downloadBackup(){ saveData(); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(appData)],{type:'json'})); a.download='backup.json'; a.click(); }
-        function restoreBackup(i){ const r=new FileReader(); r.onload=e=>{appData=JSON.parse(e.target.result);saveData();location.reload();}; r.readAsText(i.files[0]); }
-        
-        // --- IRRF (Edição) ---
-        function renderIrrf(){ document.getElementById('irrf-table-body').innerHTML=appData.irrfTable.map(r=>`<tr><td>${r.max}</td><td>${r.rate}</td><td>${r.deduction}</td><td><button class="action-btn btn-warning" onclick="editIrrfRow('${r.id}')">✏️</button><button class="action-btn btn-danger" onclick="deleteIrrfRow('${r.id}')">X</button></td></tr>`).join(''); }
-        function deleteIrrfRow(id){ appData.irrfTable.splice(appData.irrfTable.findIndex(r=>r.id===id),1); saveData(); renderIrrf(); }
-        function openIrrfModal(){ document.getElementById('form-irrf').reset(); document.getElementById('irrf-id').value = ''; document.getElementById('modal-irrf').classList.remove('hidden'); }
-        function editIrrfRow(id) {
-            const row = appData.irrfTable.find(r => r.id === id);
-            if(row) {
-                document.getElementById('irrf-id').value = row.id;
-                document.getElementById('irrf-max').value = row.max;
-                document.getElementById('irrf-rate').value = row.rate;
-                document.getElementById('irrf-deduction').value = row.deduction;
-                document.getElementById('modal-irrf').classList.remove('hidden');
-            }
-        }
-        function saveIrrfRow(e){ 
-            e.preventDefault(); 
-            const id = document.getElementById('irrf-id').value;
-            const data = {
-                id: id || 'irrf_'+Date.now(), 
-                max:parseFloat(e.target[1].value), 
-                rate:parseFloat(e.target[2].value), 
-                deduction:parseFloat(e.target[3].value)
-            };
-            
-            if (id) {
-                const idx = appData.irrfTable.findIndex(r => r.id === id);
-                if (idx !== -1) appData.irrfTable[idx] = data;
-            } else {
-                appData.irrfTable.push(data); 
-            }
-            saveData(); closeModal('modal-irrf'); renderIrrf(); 
-        }
-
-        init();
-    </script>
+    <!-- Script Principal -->
+    <script src="script.js"></script>
 </body>
 </html>
