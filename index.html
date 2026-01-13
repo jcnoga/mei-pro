@@ -62,7 +62,7 @@ if ('serviceWorker' in navigator) {
                 <input type="password" id="login-password" placeholder="Senha" required>
                 <button type="submit" class="btn-primary w-full">Entrar</button>
                 <div class="mt-4 flex flex-col gap-2">
-                    <button type="button" class="btn-outline w-full" onclick="toggleAuth('register')">Criar Conta (90 dias grátis)</button>
+                    <button type="button" class="btn-outline w-full" onclick="toggleAuth('register')">Criar Conta (30 dias grátis)</button>
                     <!-- Integração Google -->
                     <button type="button" class="google-btn w-full" onclick="handleGoogleLogin()">Entrar com Google</button>
                     <a href="#" onclick="alert('Simulação: Link de recuperação enviado para o e-mail!')" class="text-center text-sm text-primary mt-2">Esqueci minha senha</a>
@@ -72,7 +72,7 @@ if ('serviceWorker' in navigator) {
                 <input type="text" id="reg-name" placeholder="Seu Nome Completo" required>
                 <input type="email" id="reg-email" placeholder="E-mail" required>
                 <input type="password" id="reg-password" placeholder="Senha" required>
-                <button type="submit" class="btn-success w-full">Cadastrar e Ganhar 90 Dias</button>
+                <button type="submit" class="btn-success w-full">Cadastrar e Ganhar 30 Dias</button>
                 <button type="button" class="btn-outline w-full mt-4" onclick="toggleAuth('login')">Voltar para Login</button>
             </form>
         </div>
