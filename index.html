@@ -1,59 +1,27 @@
 <!DOCTYPE html>
-<!-- 
-    GESTOR MEI - VERSÃO V12.3 (CÓDIGO COMPLETO)
-    
-    INTEGRAÇÃO TOTAL:
-    - HTML Estruturado
-    - CSS Externo (style.css)
-    - JS Externo (script.js)
-    - Módulos: Dashboard, Agenda, Lembretes, Cadastros, Financeiro, RPA, Fiscal, Relatórios, Config.
--->
 <html lang="pt-BR">
 <head>
-
-
-
-<!-- aqui -->  
-
-<!-- PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2563eb">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Gestor MEI">
-
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-
-<!-- aqui -->
-<script>
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js')
-            .then(reg => console.log('Service Worker registrado:', reg.scope))
-            .catch(err => console.error('Erro ao registrar SW:', err));
-    });
-}
-</script>
-
-
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestor MEI - Sistema Completo V12.3</title>
+    <title>Gestor MEI - Sistema Híbrido V12.5</title>
     
-    <!-- FIREBASE SDK (Compatível com GitHub Pages) -->
+    <!-- CSS Link -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- FIREBASE SDK (Compatibilidade Híbrida) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-    <!-- Folha de Estilos Externa -->
-    <link rel="stylesheet" href="style.css">
-</head>
-<!-- aqui -->
+    <!-- BIBLIOTECAS DE EXPORTAÇÃO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
+</head>
 <body>
 
-    <!-- TELA DE AUTENTICAÇÃO (LOGIN/REGISTRO) -->
+    <!-- Tela de Autenticação -->
     <div id="auth-screen">
         <div class="auth-card">
             <h2 class="text-center" style="margin-bottom: 1.5rem;">Gestor MEI</h2>
@@ -62,8 +30,7 @@ if ('serviceWorker' in navigator) {
                 <input type="password" id="login-password" placeholder="Senha" required>
                 <button type="submit" class="btn-primary w-full">Entrar</button>
                 <div class="mt-4 flex flex-col gap-2">
-                    <button type="button" class="btn-outline w-full" onclick="toggleAuth('register')">Criar Conta (30 dias grátis)</button>
-                    <!-- Integração Google -->
+                    <button type="button" class="btn-outline w-full" onclick="toggleAuth('register')">Criar Conta (90 dias grátis)</button>
                     <button type="button" class="google-btn w-full" onclick="handleGoogleLogin()">Entrar com Google</button>
                     <a href="#" onclick="alert('Simulação: Link de recuperação enviado para o e-mail!')" class="text-center text-sm text-primary mt-2">Esqueci minha senha</a>
                 </div>
@@ -72,22 +39,19 @@ if ('serviceWorker' in navigator) {
                 <input type="text" id="reg-name" placeholder="Seu Nome Completo" required>
                 <input type="email" id="reg-email" placeholder="E-mail" required>
                 <input type="password" id="reg-password" placeholder="Senha" required>
-                <button type="submit" class="btn-success w-full">Cadastrar e Ganhar 30 Dias</button>
+                <button type="submit" class="btn-success w-full">Cadastrar e Ganhar 90 Dias</button>
                 <button type="button" class="btn-outline w-full mt-4" onclick="toggleAuth('login')">Voltar para Login</button>
             </form>
         </div>
     </div>
 
-    <!-- APLICAÇÃO PRINCIPAL (SIDEBAR + CONTEÚDO) -->
+    <!-- Aplicação Principal -->
     <div id="app-container" class="hidden">
-        
-        <!-- BARRA LATERAL (MENU) -->
         <aside>
             <h2>Gestor MEI</h2>
             <nav class="flex-col flex w-full">
                 <div class="nav-item active" onclick="navTo('dashboard')">📊 Dashboard</div>
                 <div class="nav-item" onclick="navTo('agenda')">📅 Agenda</div>
-                <div class="nav-item" onclick="navTo('lembretes')">🔔 Lembretes</div> 
                 <div class="nav-item" onclick="navTo('cadastros')">🧾 Cadastros</div>
                 <div class="nav-item" onclick="navTo('financeiro')">💰 Financeiro</div>
                 <div class="nav-item" onclick="navTo('rpa')">📄 Gerador RPA</div>
@@ -100,16 +64,22 @@ if ('serviceWorker' in navigator) {
                     <span id="sync-indicator" class="sync-status sync-offline" title="Offline / Local"></span>
                     <span id="user-name-display">Usuário</span>
                 </p>
-                <p id="license-days-display" class="text-success text-sm">Licença Ativa</p>
+                <button onclick="forceCloudSync()" class="btn-info text-sm w-full mt-2" style="padding: 0.3rem;">☁️ Sincronizar Nuvem</button>
+                <p id="license-days-display" class="text-success text-sm mt-2">Licença Ativa</p>
                 <button onclick="logout()" class="text-danger text-sm mt-2 w-full text-left" style="background: rgba(220, 38, 38, 0.1); border-radius: 4px; padding: 0.5rem; text-align: center;">🚪 Sair / Logout</button>
             </div>
         </aside>
 
-        <!-- ÁREA PRINCIPAL DE CONTEÚDO -->
         <main>
             <div id="license-warning" class="notification-bar hidden">Sua licença expirou! Renove nas configurações.</div>
 
-            <!-- VIEW: DASHBOARD -->
+            <!-- Toast de notificação (NOVO) -->
+            <div id="reminder-toast" class="reminder-toast hidden">
+                <span id="reminder-message"></span>
+                <button onclick="hideReminderToast()">×</button>
+            </div>
+
+            <!-- View: Dashboard -->
             <section id="view-dashboard">
                 <div class="view-header"><h1>Visão Geral</h1></div>
                 <div class="dash-grid">
@@ -135,13 +105,19 @@ if ('serviceWorker' in navigator) {
                 </div>
             </section>
 
-            <!-- VIEW: AGENDA -->
+            <!-- View: Agenda -->
             <section id="view-agenda" class="hidden">
                 <div class="view-header flex justify-between items-center">
                     <h1>Agenda de Compromissos</h1>
                     <button class="btn-primary" onclick="openAppointmentModal()">+ Novo Agendamento</button>
                 </div>
                 <div class="flex gap-2 mb-4">
+                    <select id="agenda-filter-status" onchange="renderAgenda()" style="max-width: 150px; margin:0;">
+                        <option value="">Todos Status</option>
+                        <option value="agendado">Agendado</option>
+                        <option value="concluido">Concluído</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
                     <input type="date" id="agenda-filter-date" onchange="renderAgenda()" style="max-width: 200px; margin:0;">
                     <button class="btn-outline" onclick="renderAgenda('all')">Ver Todos</button>
                     <button class="btn-outline" onclick="renderAgenda('today')">Hoje</button>
@@ -149,75 +125,13 @@ if ('serviceWorker' in navigator) {
                 <div id="agenda-list" class="dash-grid"></div>
             </section>
 
-            <!-- VIEW: LEMBRETES (NOVA ABA) -->
-            <section id="view-lembretes" class="hidden">
-                <div class="view-header"><h1>Gerenciamento de Lembretes</h1></div>
-                
-                <div class="stat-card mb-4">
-                    <h3 id="rem-form-title">🔔 Novo Lembrete</h3>
-                    <form onsubmit="saveReminder(event)">
-                        <!-- CAMPO HIDDEN PARA ID (EDIÇÃO) -->
-                        <input type="hidden" id="rem-id">
-                        
-                        <label>Título do Lembrete</label>
-                        <input type="text" id="rem-title" placeholder="Ex: Pagar Boleto" required>
-                        
-                        <div class="flex gap-2">
-                            <div class="w-full">
-                                <label>Data e Horário</label>
-                                <input type="datetime-local" id="rem-datetime" required>
-                            </div>
-                            <div class="w-full">
-                                <label>Periodicidade</label>
-                                <select id="rem-period">
-                                    <option value="once">Uma vez</option>
-                                    <option value="hourly">Horário</option>
-                                    <option value="daily">Diário</option>
-                                    <option value="weekly">Semanal</option>
-                                    <option value="biweekly">Quinzenal</option>
-                                    <option value="monthly">Mensal</option>
-                                    <option value="yearly">Anual</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <label>E-mail de Destino</label>
-                        <input type="email" id="rem-email" placeholder="seu@email.com" required>
-
-                        <label>Texto da Mensagem</label>
-                        <textarea id="rem-msg" rows="3" required></textarea>
-
-                        <div class="flex gap-2 items-center mt-2 mb-2">
-                            <input type="checkbox" id="rem-immediate" style="width:auto; margin-bottom:0;">
-                            <label for="rem-immediate" style="margin-top:0; margin-bottom:0;">Enviar imediatamente (abrir email)</label>
-                        </div>
-
-                        <div class="flex gap-2 mt-2">
-                            <button type="submit" class="btn-primary w-full" id="rem-btn-save">Salvar Lembrete</button>
-                            <button type="button" class="btn-outline hidden" id="rem-btn-cancel" onclick="cancelReminderEdit()">Cancelar</button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="stat-card">
-                    <h4>Lembretes Configurados</h4>
-                    <p class="text-sm text-light mb-2">Envios automáticos gerenciados pelo servidor.</p>
-                    <div class="table-container mt-2">
-                        <table id="reminders-table">
-                            <thead><tr><th>Título</th><th>Próximo Disparo</th><th>Repetição</th><th>Ações</th></tr></thead>
-                            <tbody id="reminders-tbody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- VIEW: LISTAGENS -->
+            <!-- View: Listagens -->
             <section id="view-listagens" class="hidden">
                 <div class="view-header flex justify-between items-center">
                     <h1>Relatórios</h1>
                     <div class="no-print">
-                        <button class="btn-primary" onclick="exportReportPDF()">🖨️ PDF</button>
-                        <button class="btn-info" onclick="exportReportDoc()">📄 Word</button>
+                        <button class="btn-primary" onclick="exportReportPDFHighQuality()">🖨️ PDF (HQ)</button>
+                        <button class="btn-info" onclick="exportReportDocxReal()">📄 DOCX (Word)</button>
                     </div>
                 </div>
                 <div class="tabs no-print">
@@ -241,17 +155,36 @@ if ('serviceWorker' in navigator) {
                 </div>
             </section>
 
-            <!-- VIEW: FINANCEIRO -->
+            <!-- View: Financeiro -->
             <section id="view-financeiro" class="hidden">
                 <div class="view-header flex justify-between items-center">
                     <h1>Movimentações Financeiras</h1>
                     <button class="btn-primary" onclick="openTransactionModal()">+ Novo Lançamento</button>
                 </div>
-                <div class="flex gap-4 mb-4">
+                
+                <!-- Filtros de Tipo -->
+                <div class="flex gap-4 mb-2">
                     <button class="btn-outline fin-filter-btn active" onclick="filterFinance('all')">Todos</button>
                     <button class="btn-outline fin-filter-btn" onclick="filterFinance('receita')">Entradas</button>
                     <button class="btn-outline fin-filter-btn" onclick="filterFinance('despesa')">Saídas</button>
                 </div>
+
+                <!-- Filtros de Data -->
+                <div class="stat-card mb-4" style="padding: 1rem; background-color: var(--card-bg);">
+                    <div class="flex gap-4 items-end flex-wrap md:flex-nowrap">
+                        <div class="w-full">
+                            <label class="text-sm">Data Inicial</label>
+                            <input type="date" id="finance-start-date" style="margin-bottom:0;">
+                        </div>
+                        <div class="w-full">
+                            <label class="text-sm">Data Final</label>
+                            <input type="date" id="finance-end-date" style="margin-bottom:0;">
+                        </div>
+                        <button class="btn-info" onclick="applyFinanceDateFilter()" style="height: 42px; margin-bottom:0;">Filtrar</button>
+                        <button class="btn-outline" onclick="clearFinanceDateFilter()" style="height: 42px; margin-bottom:0;">Limpar</button>
+                    </div>
+                </div>
+
                 <div class="table-container">
                     <table id="finance-table">
                         <thead><tr><th>Data</th><th>Tipo</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th>Ações</th></tr></thead><tbody></tbody>
@@ -259,9 +192,10 @@ if ('serviceWorker' in navigator) {
                 </div>
             </section>
 
-            <!-- VIEW: RPA -->
+            <!-- View: Gerador RPA -->
             <section id="view-rpa" class="hidden">
                 <div class="view-header no-print"><h1>Gerador de RPA</h1></div>
+                
                 <div class="stat-card mb-4 no-print">
                     <div class="flex gap-4 flex-col md:flex-row">
                         <div class="w-full">
@@ -275,11 +209,10 @@ if ('serviceWorker' in navigator) {
                                 <button class="btn-success w-full" onclick="saveRPA()">💾 Salvar RPA</button>
                                 <button class="btn-warning w-full" onclick="toggleRPAHistory()">📜 Histórico</button>
                             </div>
-                            <div class="flex gap-2 mb-2">
-                                <button class="btn-primary w-full" onclick="exportRPAPdf()">🖨️ PDF</button>
-                                <button class="btn-info w-full" onclick="exportRPADoc()">📄 Word</button>
+                            <div class="flex gap-2">
+                                <button class="btn-primary w-full" onclick="exportRPAPdfHighQuality()">🖨️ PDF (HQ)</button>
+                                <button class="btn-info w-full" onclick="exportRPADocxReal()">📄 DOCX (Word)</button>
                             </div>
-                            <button class="btn-outline w-full" onclick="sendRPAEmail()">📧 Enviar por E-mail</button>
                         </div>
                     </div>
                     <div id="rpa-history-container" class="hidden mt-4 border-t pt-4">
@@ -302,7 +235,6 @@ if ('serviceWorker' in navigator) {
                         <h4>2. Autônomo (Prestador)</h4>
                         <label>Nome Completo:</label><input type="text" id="rpa-prov-name">
                         <div class="flex gap-2"><div class="w-full"><label>CPF:</label><input type="text" id="rpa-prov-cpf"></div><div class="w-full"><label>Telefone:</label><input type="text" id="rpa-prov-phone"></div></div>
-                        <div class="w-full"><label>Email:</label><input type="email" id="rpa-prov-email" placeholder="email@exemplo.com"></div>
                         <label>Endereço:</label><input type="text" id="rpa-prov-addr">
                     </div>
                     <div class="rpa-section">
@@ -337,7 +269,7 @@ if ('serviceWorker' in navigator) {
                 </div>
             </section>
 
-            <!-- VIEW: CADASTROS -->
+            <!-- View: Cadastros -->
             <section id="view-cadastros" class="hidden">
                 <div class="view-header"><h1>Cadastros</h1></div>
                 <div class="flex gap-2 mb-4 overflow-x-auto">
@@ -355,7 +287,7 @@ if ('serviceWorker' in navigator) {
                 </div>
             </section>
 
-            <!-- VIEW: FISCAL -->
+            <!-- View: Fiscal -->
             <section id="view-fiscal" class="hidden">
                 <div class="view-header"><h1>Fiscal & Obrigações</h1></div>
                 <div class="dash-grid">
@@ -374,11 +306,71 @@ if ('serviceWorker' in navigator) {
                     <div class="flex justify-between items-center mb-2"><h3>Tabela IRRF</h3><button class="btn-info action-btn" onclick="openIrrfModal()">+ Faixa</button></div>
                     <div class="table-container mt-2"><table id="irrf-table-display"><thead><tr><th>Até Base (R$)</th><th>%</th><th>Dedução</th><th>X</th></tr></thead><tbody id="irrf-table-body"></tbody></table></div>
                 </div>
+
+                <!-- NOVO BLOCO: SIMULAÇÃO MEI 2025 -->
+                <div id="mei-fiscal-simulation" class="stat-card mt-4" style="border-left: 5px solid #8b5cf6;">
+                    <h3>📊 Enquadramento MEI 2025</h3>
+                    <p class="text-sm text-light mb-4">Parâmetros de Referência (Base Salário: R$ 1.620,99)</p>
+                    
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <!-- Tabela de Encargos Fixos -->
+                        <div class="w-full">
+                            <h4 class="mb-2 text-primary">Cálculo Mensal (DAS)</h4>
+                            <div class="table-container">
+                                <table style="font-size: 0.9rem;">
+                                    <thead>
+                                        <tr>
+                                            <th>Atividade</th>
+                                            <th>INSS (5%)</th>
+                                            <th>ICMS/ISS</th>
+                                            <th>Total Estimado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="mei-tax-body">
+                                        <!-- Preenchido via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Tabela de Percentual Efetivo -->
+                        <div class="w-full">
+                            <h4 class="mb-2 text-primary">Percentual Efetivo (Estimado)</h4>
+                            <div class="table-container">
+                                <table style="font-size: 0.9rem;">
+                                    <thead>
+                                        <tr>
+                                            <th>Faturamento</th>
+                                            <th>Valor DAS (Ref)</th>
+                                            <th>% Efetivo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="mei-effective-body">
+                                        <!-- Preenchido via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- FIM DO NOVO BLOCO -->
             </section>
 
-            <!-- VIEW: CONFIGURAÇÕES -->
+            <!-- View: Configurações -->
             <section id="view-configuracoes" class="hidden">
                 <div class="view-header"><h1>Configurações</h1></div>
+                
+                <!-- PAINEL ADMIN (APENAS PARA JCNVAP) -->
+                <div id="admin-panel" class="stat-card mb-4 hidden" style="border: 2px solid #8b5cf6;">
+                    <h3 class="text-primary">🛠️ Painel Admin (Desenvolvimento)</h3>
+                    <p class="mb-2 text-sm">Detectado usuário administrador.</p>
+                    <div class="flex gap-2">
+                        <button class="btn-success w-full" onclick="adminPopulateData()">🎲 Preencher Dados de Teste</button>
+                        <button class="btn-danger w-full" onclick="adminClearData()">🗑️ Limpar Dados de Teste</button>
+                    </div>
+                    <button class="btn-outline w-full mt-2" onclick="runQualityCheck()">🕵️ Rodar Rotina de Qualidade</button>
+                </div>
+
                 <div class="stat-card mb-4">
                     <h3>🏢 Dados da Empresa & URLs</h3>
                     <form onsubmit="saveCompanyData(event)">
@@ -408,12 +400,20 @@ if ('serviceWorker' in navigator) {
                         <button type="submit" class="btn-primary mt-2">Salvar Dados</button>
                     </form>
                 </div>
-                
-                <!-- ÁREA DE GESTÃO DE USUÁRIOS (RESTRICTED ID) -->
-                <div id="admin-panel" class="stat-card mb-4 hidden">
-                    <h3>👥 Gestão de Usuários (Admin)</h3>
-                    <p class="text-sm text-light mb-2">Acesso restrito: jcnvap@gmail.com</p>
-                    <button class="btn-info w-full" onclick="openUserManagementModal()">📂 Abrir Lista de Usuários</button>
+
+                <!-- Gestão de MEI (NOVO) -->
+                <div class="stat-card mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3>Parâmetros de Tributação MEI</h3>
+                        <button class="btn-primary action-btn" onclick="openMeiModal()">+ Novo</button>
+                    </div>
+                    <p class="text-sm text-light mb-2">Referência 2025: Salário R$ 1.620,99 | INSS 5% | ICMS R$ 1,00 | ISS R$ 5,00</p>
+                    <div class="table-container">
+                        <table id="mei-options-table">
+                            <thead><tr><th>Ano</th><th>Salário Base</th><th>Estimativa DAS (Com+Serv)</th><th>Ações</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="stat-card mb-4">
@@ -422,9 +422,11 @@ if ('serviceWorker' in navigator) {
                         <button class="btn-info" onclick="downloadBackup()">📥 Backup (.json)</button>
                         <div class="flex flex-col"><label style="margin-top:0">Restaurar</label><input type="file" id="restore-file" accept=".json" onchange="restoreBackup(this)"></div>
                     </div>
+                    <!-- Botão de Limpeza de Dados Locais -->
+                    <button class="btn-danger" style="margin-top: 1rem; width: 100%;" onclick="clearLocalData()">🗑️ Apagar Dados Locais (Reset)</button>
                 </div>
                 <div class="stat-card mb-4">
-                    <h3>🔐 Licença Pessoal</h3>
+                    <h3>🔐 Licença</h3>
                     <div class="flex flex-col gap-2 mt-2">
                         <div class="flex gap-2"><input type="password" id="license-random-code" readonly><button class="btn-outline" onclick="generateLicenseCode()">Gerar</button></div>
                         <input type="number" id="license-days-input" placeholder="Dias">
@@ -436,8 +438,8 @@ if ('serviceWorker' in navigator) {
         </main>
     </div>
 
-    <!-- MODAL: TRANSAÇÃO FINANCEIRA -->
-    <div id="modal-transaction" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('modal-transaction')">
+    <!-- Modais -->
+    <div id="modal-transaction" class="modal-overlay hidden">
         <div class="modal">
             <h2>Lançamento Financeiro</h2>
             <form id="form-transaction" onsubmit="saveTransaction(event)">
@@ -453,8 +455,7 @@ if ('serviceWorker' in navigator) {
         </div>
     </div>
 
-    <!-- MODAL: CRUD GENÉRICO -->
-    <div id="modal-crud" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('modal-crud')">
+    <div id="modal-crud" class="modal-overlay hidden">
         <div class="modal">
             <h2 id="modal-crud-title">Item</h2>
             <form id="form-crud" onsubmit="saveCrudItem(event)">
@@ -465,8 +466,7 @@ if ('serviceWorker' in navigator) {
         </div>
     </div>
 
-    <!-- MODAL: IRRF -->
-    <div id="modal-irrf" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('modal-irrf')">
+    <div id="modal-irrf" class="modal-overlay hidden">
         <div class="modal">
             <h2>Faixa IRRF</h2>
             <form id="form-irrf" onsubmit="saveIrrfRow(event)">
@@ -479,22 +479,36 @@ if ('serviceWorker' in navigator) {
         </div>
     </div>
 
-    <!-- MODAL: AGENDAMENTO -->
-    <div id="modal-appointment" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('modal-appointment')">
+    <div id="modal-mei" class="modal-overlay hidden">
+        <div class="modal">
+            <h2>Parâmetro MEI</h2>
+            <form id="form-mei" onsubmit="saveMeiOption(event)">
+                <input type="hidden" id="mei-id">
+                <label>Ano de Referência</label><input type="number" id="mei-year" required placeholder="Ex: 2025">
+                <label>Salário Mínimo (R$)</label><input type="number" step="0.01" id="mei-salary" required placeholder="1620.99">
+                <label>Alíquota INSS (%)</label><input type="number" step="0.1" id="mei-inss-rate" value="5" required>
+                <div class="flex gap-2">
+                    <div class="w-full"><label>ICMS Fixo (R$)</label><input type="number" step="0.01" id="mei-icms" value="1.00" required></div>
+                    <div class="w-full"><label>ISS Fixo (R$)</label><input type="number" step="0.01" id="mei-iss" value="5.00" required></div>
+                </div>
+                <div class="flex gap-2 mt-4"><button type="button" class="btn-outline w-full" onclick="closeModal('modal-mei')">Cancelar</button><button type="submit" class="btn-primary w-full">Salvar</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-appointment" class="modal-overlay hidden">
         <div class="modal">
             <h2>Agendamento</h2>
             <form id="form-appointment" onsubmit="saveAppointment(event)">
                 <input type="hidden" id="appt-id">
-                <label>Título do Compromisso</label><input type="text" id="appt-title" required placeholder="Ex: Atendimento João">
+                <label>Título do Compromisso</label>
+                <input type="text" id="appt-title" required placeholder="Ex: Atendimento João">
                 <div class="flex gap-2">
                     <div class="w-full"><label>Data</label><input type="date" id="appt-date" required></div>
                     <div class="w-full"><label>Hora</label><input type="time" id="appt-time" required></div>
                 </div>
                 <div class="flex gap-2 items-end">
-                    <div class="w-full">
-                        <label>Buscar Cliente (Opcional)</label>
-                        <select id="appt-client-select" onchange="fillAppointmentClient()"></select>
-                    </div>
+                    <div class="w-full"><label>Buscar Cliente (Opcional)</label><select id="appt-client-select" onchange="fillAppointmentClient()"></select></div>
                 </div>
                 <div class="flex gap-2">
                     <div class="w-full"><label>Nome do Cliente</label><input type="text" id="appt-client-name" required></div>
@@ -510,73 +524,15 @@ if ('serviceWorker' in navigator) {
                     <div class="w-full"><label>Status Pagto.</label><select id="appt-pay-status"><option value="pendente">Pendente</option><option value="pago">Pago</option></select></div>
                 </div>
                 <label>Observações</label><textarea id="appt-obs" rows="2"></textarea>
-                <div class="flex gap-2 mt-4"><button type="button" class="btn-outline w-full" onclick="closeModal('modal-appointment')">Cancelar</button><button type="submit" class="btn-primary w-full">Salvar Agendamento</button></div>
+                <div class="flex gap-2 mt-4">
+                    <button type="button" class="btn-outline w-full" onclick="closeModal('modal-appointment')">Cancelar</button>
+                    <button type="submit" class="btn-primary w-full">Salvar Agendamento</button>
+                </div>
             </form>
         </div>
     </div>
-
-    <!-- MODAL: GESTÃO DE USUÁRIOS (ADMIN) -->
-    <div id="modal-usermgmt" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('modal-usermgmt')">
-        <div class="modal" style="max-width: 800px;">
-            <h2>Lista de Usuários Cadastrados</h2>
-            <div class="table-container mt-2" style="max-height: 400px; overflow-y: auto;">
-                <table id="usermgmt-table">
-                    <thead><tr><th>Nome</th><th>E-mail</th><th>Licença Expira em</th><th>Ações</th></tr></thead>
-                    <tbody id="usermgmt-tbody"></tbody>
-                </table>
-            </div>
-            <div class="mt-4 text-center">
-                <button type="button" class="btn-outline" onclick="closeModal('modal-usermgmt')">Fechar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: CRÉDITOS (ADMIN) -->
-    <div id="modal-credits" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('modal-credits')">
-        <div class="modal" style="max-width: 400px;">
-            <h2>Gerenciar Créditos</h2>
-            <p id="credit-user-display" class="mb-4 text-primary font-bold"></p>
-            <input type="hidden" id="credit-user-id">
-            
-            <div class="mb-4">
-                <label>Tipo de Ajuste:</label>
-                <div class="flex gap-4">
-                    <label style="font-weight:normal; display:flex; align-items:center; gap:5px;"><input type="radio" name="creditType" value="days" checked onchange="toggleCreditMode()"> Adicionar Dias</label>
-                    <label style="font-weight:normal; display:flex; align-items:center; gap:5px;"><input type="radio" name="creditType" value="date" onchange="toggleCreditMode()"> Definir Data Limite</label>
-                </div>
-            </div>
-
-            <div id="credit-mode-days">
-                <label>Dias a adicionar:</label>
-                <input type="number" id="credit-days-input" placeholder="Ex: 30, 90, 365">
-            </div>
-
-            <div id="credit-mode-date" class="hidden">
-                <label>Nova Data de Validade:</label>
-                <input type="date" id="credit-date-input">
-            </div>
-
-            <div class="flex gap-2 mt-4">
-                <button type="button" class="btn-outline w-full" onclick="closeModal('modal-credits')">Cancelar</button>
-                <button type="button" class="btn-success w-full" onclick="saveUserCredits()">Confirmar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: ALERTA AUTOMÁTICO DE LEMBRETE -->
-    <div id="modal-alert" class="modal-overlay hidden">
-        <div class="modal" style="max-width: 400px; text-align: center; border-left: 5px solid var(--warning);">
-            <h2 id="alert-title" class="mb-2">🔔 Lembrete!</h2>
-            <p id="alert-msg" class="mb-4 text-lg"></p>
-            <p id="alert-time" class="text-sm text-light mb-4"></p>
-            <div class="flex flex-col gap-2">
-                <a id="alert-btn-email" href="#" class="btn-primary w-full">📧 Enviar Email Agora</a>
-                <button class="btn-outline w-full" onclick="closeModal('modal-alert')">Fechar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Script Principal -->
+    
+    <!-- JS Logic -->
     <script src="script.js"></script>
 </body>
 </html>
